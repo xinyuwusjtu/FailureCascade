@@ -1,6 +1,6 @@
 function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised_AC_New_Slack(mpc, powerInj, adjacency, reactance, capacity, capacity_vector, alpha, initFail,tmp_index)
     
-    history = adjacency;    %elements in `history' refer to the cascade round that the link failed in
+    history = adjacency; 
     shedding_factor=0.8;
     count=0;
     while 1
@@ -25,7 +25,7 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
     end
     result.branch=[result.branch,mpc.branch(:,14)];
 
-    initDem = -sum( min(powerInj, 0) ); %find initial power demand
+    initDem = -sum( min(powerInj, 0) );
         
     tempur_vector=1/2*(sqrt(result.branch(:,14).^2+result.branch(:,15).^2)+sqrt(result.branch(:,16).^2+result.branch(:,17).^2));
     
@@ -35,7 +35,6 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
         tempur(result.branch(i,2),result.branch(i,1))=tempur_vector(i,1);        
     end
     
-    %capacity = tempur.*resilience;
     for i=1:size( initFail, 1)
         adjacency( initFail(i,1), initFail(i,2) ) = 0;
         adjacency( initFail(i,2), initFail(i,1) ) = 0;
@@ -44,8 +43,6 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
     link_flag_vector=ones(size(result.branch,1),1);
     
     link_flag_vector(tmp_index,1)=0;
-    size(tmp_index);
-    %mpc.branch(tmp_index,4)=Inf;
     for t=1:size(tmp_index,1)
         mpc.branch(find(mpc.branch(:,14)==tmp_index(t)),:)=[];
     end
@@ -55,10 +52,7 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
     G=digraph(link_row',link_column');
     [C,weak_size] = conncomp(G,'Type','weak');
     S=size(weak_size,2);
-    
-    S;
-    C;
-        
+
     %Load Shedding
     if S>1
         result_tmp=result;
@@ -206,9 +200,7 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
      
     tempur = tempur .* adjacency;
     history = history + adjacency;
-%     
-%    new_tmp=tmp_index;
-%     
+
     Node_index=zeros(size(adjacency,1),1);
     for i=1:size(adjacency,1)
         Node_index(i,1)=i; 
@@ -229,13 +221,6 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
 
         bOverload =  max( max( (abs(powerFlow) > capacity).*adjacency ) );
         adjacency = ( tempur <= capacity ).*adjacency;
-               
-        %Failure_set_update
-%         size(flow_vector)
-%         size(capacity_vector(find(link_flag_vector==1)))
-%         
-%          test_1=result.branch(:,18)'
-%         test_2=[find(link_flag_vector==1)]'
         
         fail_index = find(flow_vector>capacity_vector(find(link_flag_vector==1)));
         tmp_index=mpc.branch(fail_index,14);
@@ -269,37 +254,11 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                          CC_Gen_Index=[CC_Gen_Index;j];
                      end
                 end
-%                 if sum(CC_Load)>sum(CC_Gen)
-%                     if sum(CC_Gen)>0
-%                        CC_Load=CC_Load*sum(CC_Gen)/sum(CC_Load);
-%                        mpc.bus(CC_Index,3)=CC_Load;
-%                     else
-%                        mpc.gen(CC_Gen_Index,2)=0;
-% %                        mpc.bus(CC_Index,3)=0;
-%                     end
-%                 else
-%                     if sum(CC_Load)<sum(CC_Gen)
-%                         if sum(CC_Load)>0
-%                            CC_Gen=CC_Gen*sum(CC_Load)/sum(CC_Gen);
-%                            mpc.gen(CC_Gen_Index,2)=CC_Gen;
-%                         else
-%                            mpc.gen(CC_Gen_Index,2)=0;
-% %                            mpc.bus(CC_Index,3)=0;
-%                         end
-%                     end
-%                 end
 
                 mpc_i=mpc;
                 mpc_i.bus=mpc.bus(CC_Index,:);
                 mpc_i.gen=mpc.gen(CC_Gen_Index,:);
                 mpc_i.gencost=mpc.gencost(CC_Gen_Index,:);
-                
-                %Only select in generators
-%                 if size(find(mpc_i.bus(:,2)==3),1)==0 && size(mpc_i.bus(:,2),1)>1
-%                     index_slack_set=find(mpc_i.bus(:,3)==min(mpc_i.bus(:,3)));
-%                     index_slack=index_slack_set(1,1);
-%                     mpc_i.bus(index_slack,2)=3;
-%                 end
 
                 if size(find(mpc_i.bus(:,2)==3),1)==0 && size(mpc_i.bus(:,2),1)>1
                     if size(find(mpc_i.bus(:,2)==2),1)>0
@@ -307,17 +266,11 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                         index_slack_set=find(mpc_i.bus(tmp_index_new,3)==min(mpc_i.bus(tmp_index_new,3)));
                         index_slack=index_slack_set(1,1);
                         mpc_i.bus(tmp_index_new(index_slack),2)=3;
-%                         mpc_i.gen(tmp_index_new(index_slack),4:5)=[Inf,-Inf];
                     end
                 end
 
                 CC_Branch_Index=[];
                 for t=1:size(mpc.branch,1)
-%                     tmp_1=(mpc_i.bus(:,1)==mpc.branch(t,1));
-%                     tmp_2=(mpc_i.bus(:,1)==mpc.branch(t,2));
-%                     if sum(tmp_1)>0 && sum(tmp_2)>0
-%                         CC_Branch_Index=[CC_Branch_Index;t];                        
-%                     end
                     if size(find(mpc_i.bus(:,1)==mpc.branch(t,1)),1)>0 && size(find(mpc_i.bus(:,1)==mpc.branch(t,2)),1)>0
                         CC_Branch_Index=[CC_Branch_Index;t];
                     end
@@ -328,11 +281,6 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                     count=0;
                     while 1
                         count=count+1;
-%                         mpc_i
-%                         i
-%                         C
-%                         S
-                        mpc_i
                         result_i=runacpf_me(mpc_i);
                         result_i.success;
                         if ~result_i.success
@@ -359,8 +307,6 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                             break; 
                         end
                     end
-%                     shedding_factor^(count-1);
-%                     result_i=runacpf_me(mpc_i);
                     result_i.branch=[result_i.branch,mpc_i.branch(:,14)];
                     result_tmp.bus=[result_tmp.bus;result_i.bus];
                     result_tmp.gen=[result_tmp.gen;result_i.gen];
@@ -378,18 +324,10 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                     result_tmp.gen=[result_tmp.gen;mpc_i.gen];
                     result_tmp.branch=[result_tmp.branch;[mpc_i.branch(:,1:size(mpc_i.branch,2)-1),zeros(size(mpc_i.branch,1),4),mpc_i.branch(:,size(mpc_i.branch,2))]];
                 end
-
-                1;
-    %             else
-    %                 result_tmp.bus=[result_tmp.bus,]
             end
             result.bus=sortrows(result_tmp.bus,1);
             result.gen=sortrows(result_tmp.gen,1);
-            result.branch=sortrows(result_tmp.branch,18); %%%Note
-%             
-%             result.branch(:,18)'
-%             [find(link_flag_vector==1)]'
-            
+            result.branch=sortrows(result_tmp.branch,18);
         else
             count=0;
             while 1
@@ -412,13 +350,8 @@ function [yield, adjacency, history, powerInj, S] = fCascadeNew_Matpower_Revised
                    break; 
                 end
             end
-%             shedding_factor^(count-1);
-%             result=runacpf_me(mpc);
             result.branch=[result.branch,mpc.branch(:,14)];
             result.branch=sortrows(result.branch,18);
-            
-%             result.branch(:,18)'
-%             [find(link_flag_vector==1)]'
         end
         
         %Add a prevention for NaN
