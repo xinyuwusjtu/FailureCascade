@@ -79,7 +79,7 @@
             Capacity(branch(i,2),branch(i,1))=9900;
         end
     end
-    Capacity_vector=branch(:,6); %IEEE30/IEEE39
+    Capacity_vector=branch(:,6);
     count=0;
     for i=1:size(Capacity_vector,1)
         if Capacity_vector(i,1)==0
@@ -101,20 +101,9 @@
     link_column=branch(:,2);
     
     z=[link_row,link_column];
-    RowColumnIndex=z;
-    
-%     %save('IEEE1354_Capacity_1_Flow_1_5_InitFail_2_Adjacency.mat','Adjacency')
-%     filename = 'IEEE1354_Capacity_1_Flow_1_5_InitFail_2_Adjacency.xlsx';
-%     xlswrite(filename,Adj);
-%     %save('IEEE1354_Capacity_1_Flow_1_5_InitFail_2_RowColumnIndex.mat','RowColumnIndex')
-%     filename = 'IEEE1354_Capacity_1_Flow_1_5_InitFail_2_RowColumnIndex.xlsx';
-%     xlswrite(filename,RowColumnIndex);
-%     load(['IEEE1354_Capacity_1_Flow_1_5_InitFail_2_Train_Balanced_New_AC.mat'],'cascade_link_cum')
-%     cascade_train=cascade_link_cum(:,1:200);
-%     filename = 'IEEE1354_Capacity_1_Flow_1_5_InitFail_2_Train_Balanced_New_AC.xlsx';
-%     xlswrite(filename,cascade_train);    
-%     index_vector=sort(randperm(M),'ascend')';
-%     mpc.branch=[mpc.branch,index_vector];
+   
+    index_vector=sort(randperm(M),'ascend')';
+    mpc.branch=[mpc.branch,index_vector];
     
     result=rundcpf_me(mpc);
     result.branch=[result.branch,mpc.branch(:,14)];
@@ -137,7 +126,7 @@
         initFail=link_set(tmp_index,:);
         initFail_Index=tmp_index;
 
-        [yield, adjacency, history, powerInjected, S] = fCascadeNew_Matpower_Revised_Slack_AC(mpc, powerInjected_ori, adjacency_ori, reactance, Capacity, Capacity_vector, alpha, initFail,tmp_index);
+        [yield, adjacency, history, powerInjected, S] = fCascadeNew_Matpower_Revised_Slack(mpc, powerInjected_ori, adjacency_ori, reactance, Capacity, Capacity_vector, alpha, initFail,tmp_index);
 
         cascade=full(history);
         cascade_link=zeros(M,1);
@@ -150,11 +139,11 @@
     end
     toc
     
-     save(['IEEE1354_Capacity_1_Flow_1_5_InitFail_' num2str(k) '_Balanced_New_AC.mat'], 'cascade_link_cum')
+    save(['IEEE1354_Capacity_1_Flow_1_5_InitFail_' num2str(k) '_Balanced_New_AC.mat'], 'cascade_link_cum')
     cascade_train=cascade_link_cum(:,1:ceil(0.9*K));
-     save(['IEEE1354_Capacity_1_5_Flow_1_InitFail_' num2str(k) '_Train_Balanced_New_AC.mat'], 'cascade_train')
+    save(['IEEE1354_Capacity_1_5_Flow_1_InitFail_' num2str(k) '_Train_Balanced_New_AC.mat'], 'cascade_train')
     cascade_test=cascade_link_cum(:,ceil(0.9*K)+1:K);
-     save(['IEEE1354_Capacity_1_5_Flow_1_InitFail_' num2str(k) '_Test_Balanced_New_AC.mat'], 'cascade_test')
+    save(['IEEE1354_Capacity_1_5_Flow_1_InitFail_' num2str(k) '_Test_Balanced_New_AC.mat'], 'cascade_test')
 
     
     S_mean=mean(S_vec)

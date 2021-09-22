@@ -1,5 +1,4 @@
     %% Learning Framework: Monte Carlo and Quadratic Optimization
-
     load('IEEE2383_Capacity_1_Flow_1_InitFail_2_Train_Balanced_New.mat','cascade_train')
     cascade=cascade_train;
     
@@ -198,5 +197,5 @@
     save(['IEEE2383_Capacity_1_Flow_1_InitFail_2_D_SampleNum_',num2str(K),'_Balanced_New.mat'],'D')
         
 function J = jacobian (Coeff,A_k) 
-    J = sparse([A_k]); %;2*Coeff'
+    J = sparse([A_k]); 
 end

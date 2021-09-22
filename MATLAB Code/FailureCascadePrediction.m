@@ -174,11 +174,9 @@
     predict_failure_count=zeros(M,Test_num);
     count_effective=0;
     
-%     Epsilon_opt=round(Epsilon_opt,6);
     Index_Test_Sample=zeros(Test_num,1);
     Test_link_index=find(fail_frequency>=0 & fail_frequency<=1);
 
-    tic
     for k=1:Test_num
         k
         
@@ -425,7 +423,6 @@
             count_effective=count_effective+1;
         end
     end
-    toc
     
     Test_num=count_effective;
     
